@@ -5,6 +5,8 @@ const Product = require("./models/product.model");
 
 app.use(express.json());
 
+app.use(express.urlencoded({extended:false}))
+
 mongoose
   .connect(
     "mongodb+srv://ayan:ayan@cluster0.7eifvyq.mongodb.net/Node-API?retryWrites=true&w=majority&appName=Cluster0"
@@ -26,7 +28,13 @@ app.get("/", (req, res) => {
   console.log("Hello World from 3000");
 });
 
-app.get("/api/products", async (req, res) => {
+
+//routes
+
+app.get("/api/product",productRoute)
+
+
+app.get("/api/product", async (req, res) => {
   try {
     const product = await Product.find({});
     res.status(200).json(product);
@@ -68,9 +76,27 @@ app.put('/api/product/:Id' , async (req,res) => {
             return res.status(404).json({message: "Product not found"})
       }
       const updatedProduct =await Product.findById(Id)
-      res.status(200).json(product)
+      if(!updatedProduct){
+            return res.status(404).json({message: "Product not found"})
+      }
+     
     } catch(err){
             res.status(500).json({message: err.message})
+    }
+})
+
+//delete 
+
+app.delete('/api/product/:Id',async (req,res)=>{
+    try{
+        const {Id} = req.params;
+        const product = await Product.findByIdAndDelete(Id)
+        if(!product){
+            return res.status(404).json({message: "Product not found"})
+        }
+        res.status(200).json({message: "Product deleted"})
+    } catch(err){
+        res.status(500).json({message: err.message})
     }
 })
 
